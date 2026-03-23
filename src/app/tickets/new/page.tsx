@@ -5,12 +5,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTickets } from '@/data/ticket-store';
 import {
+  Category,
   Channel,
   Priority,
   Ticket,
+  categories,
   channels,
   priorities,
   channelIcon,
+  categoryIcon,
 } from '@/data/mock-tickets';
 
 export default function NewTicketPage() {
@@ -18,6 +21,7 @@ export default function NewTicketPage() {
   const { tickets, addTicket } = useTickets();
 
   // 表單狀態
+  const [category, setCategory] = useState<Category>('其他');
   const [channel, setChannel] = useState<Channel>('LINE');
   const [customerName, setCustomerName] = useState('');
   const [customerContact, setCustomerContact] = useState('');
@@ -41,6 +45,7 @@ export default function NewTicketPage() {
     const now = new Date().toISOString();
     const newTicket: Ticket = {
       id: generateId(),
+      category,
       channel,
       priority,
       status: '新建',
@@ -66,6 +71,8 @@ export default function NewTicketPage() {
       history: [
         { id: `h-${Date.now()}`, action: '建立工單', actor: '客服人員', detail: `客戶透過 ${channel} 提交工單`, timestamp: now },
       ],
+      transfer: { isTransferred: false, isReturned: false },
+      isNew: true,
     };
 
     addTicket(newTicket);
@@ -96,6 +103,24 @@ export default function NewTicketPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-7 space-y-6">
+          {/* 問題分類 */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              問題分類 <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as Category)}
+              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {categoryIcon[c]} {c}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* 來源管道 */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">

@@ -9,6 +9,8 @@ import {
   channelIcon,
   statusColor,
   priorityColor,
+  categoryIcon,
+  categoryColor,
   customerLevelColor,
   customerLevelBadge,
   statusFlow,
@@ -165,12 +167,20 @@ export default function TicketDetail({ ticketId }: { ticketId: string }) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-4 mt-1.5">
+          <div className="flex items-center gap-3 mt-1.5 flex-wrap">
             <span className="text-xs font-mono text-slate-400">{ticket.id}</span>
+            <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${categoryColor[ticket.category]}`}>
+              {categoryIcon[ticket.category]} {ticket.category}
+            </span>
+            {ticket.transfer?.isTransferred && (
+              <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${ticket.transfer.isReturned ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>
+                {ticket.transfer.isReturned ? `🔄 已從 ${ticket.transfer.returnedFrom} 轉回` : `↗️ 已轉出至 ${ticket.transfer.transferTo}`}
+              </span>
+            )}
             <span className="text-xs text-slate-400">|</span>
-            <span className="text-xs text-slate-500">📞 聯繫次數：<strong className="text-slate-700">{contactCount}</strong></span>
+            <span className="text-xs text-slate-500">📞 聯繫 <strong className="text-slate-700">{contactCount}</strong> 次</span>
             <span className="text-xs text-slate-400">|</span>
-            <span className="text-xs text-slate-500">📋 歷程事件：<strong className="text-slate-700">{history.length}</strong></span>
+            <span className="text-xs text-slate-500">📋 歷程 <strong className="text-slate-700">{history.length}</strong> 筆</span>
           </div>
         </div>
       </div>

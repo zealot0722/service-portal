@@ -1,5 +1,8 @@
 // HCT 客服工單 Mock 資料
 
+/** 問題分類（主要索引） */
+export type Category = '帳號問題' | '物流配送' | '帳務/帳單' | '技術故障' | '商品瑕疵' | '功能建議' | '企業服務' | '資安事件' | '其他';
+
 /** 來源管道 */
 export type Channel = 'LINE' | '電話' | '表單' | 'Email' | '內部系統';
 
@@ -36,8 +39,19 @@ export interface HistoryEntry {
 export type TransferTarget = '技術支援' | '業務部' | '物流部' | '財務部' | '資安團隊' | '主管' | '結案';
 
 /** 工單 */
+/** 轉接狀態 */
+export interface TransferStatus {
+  isTransferred: boolean;       // 已轉出
+  transferTo?: string;          // 轉出目標
+  transferredAt?: string;       // 轉出時間
+  isReturned: boolean;          // 從其他單位轉回
+  returnedFrom?: string;        // 轉回來源
+  returnedAt?: string;          // 轉回時間
+}
+
 export interface Ticket {
   id: string;
+  category: Category;           // 問題分類
   channel: Channel;
   priority: Priority;
   status: Status;
@@ -51,9 +65,40 @@ export interface Ticket {
   updatedAt: string;
   messages: Message[];
   internalNotes: string;
-  history: HistoryEntry[];      // 案件歷程
-  contactCount: number;         // 聯繫次數
+  history: HistoryEntry[];
+  contactCount: number;
+  transfer: TransferStatus;     // 轉接狀態
+  isNew?: boolean;              // 新收到（未讀）
 }
+
+/** 所有問題分類 */
+export const categories: Category[] = ['帳號問題', '物流配送', '帳務/帳單', '技術故障', '商品瑕疵', '功能建議', '企業服務', '資安事件', '其他'];
+
+/** 分類 icon */
+export const categoryIcon: Record<Category, string> = {
+  '帳號問題': '🔑',
+  '物流配送': '🚚',
+  '帳務/帳單': '💰',
+  '技術故障': '⚙️',
+  '商品瑕疵': '📦',
+  '功能建議': '💡',
+  '企業服務': '🏢',
+  '資安事件': '🛡️',
+  '其他': '📋',
+};
+
+/** 分類顏色 badge */
+export const categoryColor: Record<Category, string> = {
+  '帳號問題': 'bg-indigo-100 text-indigo-700',
+  '物流配送': 'bg-teal-100 text-teal-700',
+  '帳務/帳單': 'bg-yellow-100 text-yellow-700',
+  '技術故障': 'bg-red-100 text-red-700',
+  '商品瑕疵': 'bg-orange-100 text-orange-700',
+  '功能建議': 'bg-cyan-100 text-cyan-700',
+  '企業服務': 'bg-blue-100 text-blue-700',
+  '資安事件': 'bg-rose-100 text-rose-700',
+  '其他': 'bg-slate-100 text-slate-600',
+};
 
 /** 轉接目標列表 */
 export const transferTargets: TransferTarget[] = ['技術支援', '業務部', '物流部', '財務部', '資安團隊', '主管', '結案'];
@@ -139,6 +184,7 @@ export const customerLevelBadge: Record<CustomerLevel, string> = {
 export const mockTickets: Ticket[] = [
   {
     id: 'T-20260323-001',
+    category: '帳號問題',
     channel: 'LINE',
     priority: '緊急',
     status: '新建',
@@ -165,9 +211,12 @@ export const mockTickets: Ticket[] = [
       { id: 'h4', action: '轉接', actor: '李小華', detail: '轉接至 技術支援 部門協助處理 SSO 問題', timestamp: '2026-03-23T08:22:00' },
       { id: 'h5', action: '聯繫客戶', actor: '李小華', detail: '透過 LINE 回覆客戶，告知已提升為緊急處理', timestamp: '2026-03-23T08:20:00' },
     ],
+    transfer: { isTransferred: true, transferTo: '技術支援', transferredAt: '2026-03-23T08:22:00', isReturned: false },
+    isNew: true,
   },
   {
     id: 'T-20260323-002',
+    category: '物流配送',
     channel: '電話',
     priority: '高',
     status: '處理中',
@@ -194,9 +243,11 @@ export const mockTickets: Ticket[] = [
       { id: 'h10', action: '聯繫客戶', actor: '張志偉', detail: '電話回覆客戶物流查詢結果', timestamp: '2026-03-23T09:45:00' },
       { id: 'h11', action: '備註', actor: '張志偉', detail: '需跟進賠償事宜，待主管核准折扣方案', timestamp: '2026-03-23T10:00:00' },
     ],
+    transfer: { isTransferred: true, transferTo: '物流部', transferredAt: '2026-03-23T09:35:00', isReturned: true, returnedFrom: '物流部', returnedAt: '2026-03-23T09:42:00' },
   },
   {
     id: 'T-20260323-003',
+    category: '企業服務',
     channel: 'Email',
     priority: '中',
     status: '待回覆',
@@ -221,9 +272,11 @@ export const mockTickets: Ticket[] = [
       { id: 'h15', action: '轉接', actor: '王雅琪', detail: '轉接至 業務部 Kevin 提供報價', timestamp: '2026-03-22T15:05:00' },
       { id: 'h16', action: '狀態變更', actor: '王雅琪', detail: '狀態更新為「待回覆」，等待業務部報價', timestamp: '2026-03-23T09:00:00' },
     ],
+    transfer: { isTransferred: true, transferTo: '業務部', transferredAt: '2026-03-22T15:05:00', isReturned: false },
   },
   {
     id: 'T-20260323-004',
+    category: '其他',
     channel: '表單',
     priority: '低',
     status: '已完成',
@@ -248,9 +301,11 @@ export const mockTickets: Ticket[] = [
       { id: 'h19', action: '聯繫客戶', actor: '李小華', detail: 'Email 回覆客戶操作步驟', timestamp: '2026-03-22T11:15:00' },
       { id: 'h20', action: '結案', actor: '李小華', detail: '客戶確認問題已解決，結案', timestamp: '2026-03-22T11:30:00' },
     ],
+    transfer: { isTransferred: false, isReturned: false },
   },
   {
     id: 'T-20260323-005',
+    category: '技術故障',
     channel: '內部系統',
     priority: '高',
     status: '處理中',
@@ -275,9 +330,11 @@ export const mockTickets: Ticket[] = [
       { id: 'h23', action: '轉接', actor: '張志偉', detail: '轉接至 技術支援 協助排查 nginx 設定', timestamp: '2026-03-23T08:10:00' },
       { id: 'h24', action: '備註', actor: '張志偉', detail: '已定位根因：nginx client_max_body_size 限制', timestamp: '2026-03-23T08:25:00' },
     ],
+    transfer: { isTransferred: true, transferTo: '技術支援', transferredAt: '2026-03-23T08:10:00', isReturned: true, returnedFrom: '技術支援', returnedAt: '2026-03-23T08:20:00' },
   },
   {
     id: 'T-20260323-006',
+    category: '帳務/帳單',
     channel: 'LINE',
     priority: '中',
     status: '新建',
@@ -298,9 +355,12 @@ export const mockTickets: Ticket[] = [
     history: [
       { id: 'h25', action: '建立工單', actor: '系統', detail: '客戶透過 LINE 提交帳單疑問', timestamp: '2026-03-23T10:05:00' },
     ],
+    transfer: { isTransferred: false, isReturned: false },
+    isNew: true,
   },
   {
     id: 'T-20260323-007',
+    category: '技術故障',
     channel: '電話',
     priority: '緊急',
     status: '處理中',
@@ -328,9 +388,11 @@ export const mockTickets: Ticket[] = [
       { id: 'h30', action: '備註', actor: '李小華', detail: '已定位問題：資料庫連線池耗盡，正在重啟', timestamp: '2026-03-23T07:25:00' },
       { id: 'h31', action: '狀態變更', actor: '李小華', detail: '狀態更新為「處理中」', timestamp: '2026-03-23T07:30:00' },
     ],
+    transfer: { isTransferred: true, transferTo: '技術支援', transferredAt: '2026-03-23T07:05:00', isReturned: false },
   },
   {
     id: 'T-20260323-008',
+    category: '功能建議',
     channel: '表單',
     priority: '低',
     status: '已完成',
@@ -354,9 +416,11 @@ export const mockTickets: Ticket[] = [
       { id: 'h34', action: '聯繫客戶', actor: '王雅琪', detail: 'Email 回覆客戶，已納入開發計畫', timestamp: '2026-03-22T10:00:00' },
       { id: 'h35', action: '結案', actor: '王雅琪', detail: '功能建議已記錄，結案', timestamp: '2026-03-22T10:05:00' },
     ],
+    transfer: { isTransferred: false, isReturned: false },
   },
   {
     id: 'T-20260323-009',
+    category: '資安事件',
     channel: 'Email',
     priority: '高',
     status: '待回覆',
@@ -382,9 +446,12 @@ export const mockTickets: Ticket[] = [
       { id: 'h39', action: '轉接', actor: '張志偉', detail: '轉接至 資安團隊 調查異常呼叫紀錄', timestamp: '2026-03-23T06:42:00' },
       { id: 'h40', action: '狀態變更', actor: '張志偉', detail: '狀態更新為「待回覆」，等待資安團隊報告', timestamp: '2026-03-23T07:00:00' },
     ],
+    transfer: { isTransferred: true, transferTo: '資安團隊', transferredAt: '2026-03-23T06:42:00', isReturned: false },
+    isNew: true,
   },
   {
     id: 'T-20260323-010',
+    category: '商品瑕疵',
     channel: '電話',
     priority: '中',
     status: '新建',
@@ -405,6 +472,8 @@ export const mockTickets: Ticket[] = [
     history: [
       { id: 'h41', action: '建立工單', actor: '系統', detail: '客戶來電反映商品瑕疵，要求退貨退款', timestamp: '2026-03-23T10:30:00' },
     ],
+    transfer: { isTransferred: false, isReturned: false },
+    isNew: true,
   },
 ];
 
