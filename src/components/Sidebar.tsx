@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 const navItems = [
   { href: '/', label: '工單列表', icon: '📋', desc: '查看所有工單' },
   { href: '/tickets/new', label: '新建工單', icon: '➕', desc: '建立新的客服工單' },
+  { href: '/reports', label: '每日報表', icon: '📊', desc: '日報檢核與送出' },
 ];
 
 export default function Sidebar() {
