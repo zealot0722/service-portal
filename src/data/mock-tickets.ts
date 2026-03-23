@@ -21,6 +21,20 @@ export interface Message {
   timestamp: string;
 }
 
+/** 案件歷程事件 */
+export type HistoryAction = '建立工單' | '指派' | '狀態變更' | '優先級變更' | '轉接' | '備註' | '聯繫客戶' | '結案';
+
+export interface HistoryEntry {
+  id: string;
+  action: HistoryAction;
+  actor: string;          // 操作人
+  detail: string;         // 事件描述
+  timestamp: string;
+}
+
+/** 轉接管道 */
+export type TransferTarget = '技術支援' | '業務部' | '物流部' | '財務部' | '資安團隊' | '主管' | '結案';
+
 /** 工單 */
 export interface Ticket {
   id: string;
@@ -37,7 +51,24 @@ export interface Ticket {
   updatedAt: string;
   messages: Message[];
   internalNotes: string;
+  history: HistoryEntry[];      // 案件歷程
+  contactCount: number;         // 聯繫次數
 }
+
+/** 轉接目標列表 */
+export const transferTargets: TransferTarget[] = ['技術支援', '業務部', '物流部', '財務部', '資安團隊', '主管', '結案'];
+
+/** 歷程事件 icon */
+export const historyIcon: Record<HistoryAction, string> = {
+  '建立工單': '📥',
+  '指派': '👤',
+  '狀態變更': '🔄',
+  '優先級變更': '⚡',
+  '轉接': '↗️',
+  '備註': '📝',
+  '聯繫客戶': '📞',
+  '結案': '✅',
+};
 
 /** 優先級權重（用於排序） */
 export const priorityWeight: Record<Priority, number> = {
@@ -126,6 +157,14 @@ export const mockTickets: Ticket[] = [
       { id: 'm4', sender: 'agent', senderName: '李小華', content: '收到，我已經將此問題提升為緊急等級，正在聯繫技術團隊協助處理，請您稍等。', timestamp: '2026-03-23T08:20:00' },
     ],
     internalNotes: '已確認是 SSO 系統異常導致，已通知 IT 部門。',
+    contactCount: 2,
+    history: [
+      { id: 'h1', action: '建立工單', actor: '系統', detail: '客戶透過 LINE 提交工單', timestamp: '2026-03-23T08:15:00' },
+      { id: 'h2', action: '指派', actor: '系統', detail: '自動指派給 李小華', timestamp: '2026-03-23T08:15:30' },
+      { id: 'h3', action: '優先級變更', actor: '李小華', detail: '優先級從「高」調整為「緊急」', timestamp: '2026-03-23T08:20:00' },
+      { id: 'h4', action: '轉接', actor: '李小華', detail: '轉接至 技術支援 部門協助處理 SSO 問題', timestamp: '2026-03-23T08:22:00' },
+      { id: 'h5', action: '聯繫客戶', actor: '李小華', detail: '透過 LINE 回覆客戶，告知已提升為緊急處理', timestamp: '2026-03-23T08:20:00' },
+    ],
   },
   {
     id: 'T-20260323-002',
@@ -146,6 +185,15 @@ export const mockTickets: Ticket[] = [
       { id: 'm7', sender: 'agent', senderName: '張志偉', content: '經查詢，您的包裹目前在桃園轉運中心，因近日大雨導致部分路線延誤。預計明天上午送達，我們會安排優先配送。', timestamp: '2026-03-23T09:45:00' },
     ],
     internalNotes: '已聯繫物流部門確認，桃園倉庫因天氣因素積壓。需跟進賠償事宜。',
+    contactCount: 3,
+    history: [
+      { id: 'h6', action: '建立工單', actor: '張志偉', detail: '客戶來電反映配送延遲', timestamp: '2026-03-23T09:30:00' },
+      { id: 'h7', action: '聯繫客戶', actor: '張志偉', detail: '電話回覆客戶，告知查詢中', timestamp: '2026-03-23T09:32:00' },
+      { id: 'h8', action: '轉接', actor: '張志偉', detail: '轉接至 物流部 查詢包裹狀態', timestamp: '2026-03-23T09:35:00' },
+      { id: 'h9', action: '狀態變更', actor: '張志偉', detail: '狀態從「新建」更新為「處理中」', timestamp: '2026-03-23T09:40:00' },
+      { id: 'h10', action: '聯繫客戶', actor: '張志偉', detail: '電話回覆客戶物流查詢結果', timestamp: '2026-03-23T09:45:00' },
+      { id: 'h11', action: '備註', actor: '張志偉', detail: '需跟進賠償事宜，待主管核准折扣方案', timestamp: '2026-03-23T10:00:00' },
+    ],
   },
   {
     id: 'T-20260323-003',
@@ -165,6 +213,14 @@ export const mockTickets: Ticket[] = [
       { id: 'm9', sender: 'agent', senderName: '王雅琪', content: '林經理您好！感謝您的來信。我已將您的需求轉給業務團隊，將在 1-2 個工作天內提供詳細報價方案。', timestamp: '2026-03-22T15:00:00' },
     ],
     internalNotes: '已轉給業務部 Kevin 處理，等待報價回覆。',
+    contactCount: 1,
+    history: [
+      { id: 'h12', action: '建立工單', actor: '系統', detail: '客戶透過 Email 提交詢問', timestamp: '2026-03-22T14:20:00' },
+      { id: 'h13', action: '指派', actor: '系統', detail: '指派給 王雅琪', timestamp: '2026-03-22T14:25:00' },
+      { id: 'h14', action: '聯繫客戶', actor: '王雅琪', detail: 'Email 回覆客戶，已轉交業務部', timestamp: '2026-03-22T15:00:00' },
+      { id: 'h15', action: '轉接', actor: '王雅琪', detail: '轉接至 業務部 Kevin 提供報價', timestamp: '2026-03-22T15:05:00' },
+      { id: 'h16', action: '狀態變更', actor: '王雅琪', detail: '狀態更新為「待回覆」，等待業務部報價', timestamp: '2026-03-23T09:00:00' },
+    ],
   },
   {
     id: 'T-20260323-004',
@@ -185,6 +241,13 @@ export const mockTickets: Ticket[] = [
       { id: 'm12', sender: 'customer', senderName: '黃小芬', content: '找到了！謝謝你的幫忙！', timestamp: '2026-03-22T11:25:00' },
     ],
     internalNotes: '',
+    contactCount: 2,
+    history: [
+      { id: 'h17', action: '建立工單', actor: '系統', detail: '客戶透過表單提交問題', timestamp: '2026-03-22T11:00:00' },
+      { id: 'h18', action: '指派', actor: '系統', detail: '指派給 李小華', timestamp: '2026-03-22T11:02:00' },
+      { id: 'h19', action: '聯繫客戶', actor: '李小華', detail: 'Email 回覆客戶操作步驟', timestamp: '2026-03-22T11:15:00' },
+      { id: 'h20', action: '結案', actor: '李小華', detail: '客戶確認問題已解決，結案', timestamp: '2026-03-22T11:30:00' },
+    ],
   },
   {
     id: 'T-20260323-005',
@@ -205,6 +268,13 @@ export const mockTickets: Ticket[] = [
       { id: 'm15', sender: 'agent', senderName: '張志偉', content: '已確認是 nginx 的 request body size 限制，正在調整設定。', timestamp: '2026-03-23T08:25:00' },
     ],
     internalNotes: '根本原因：nginx client_max_body_size 設定為 10MB，大檔案超過限制。已提交修改 PR。',
+    contactCount: 2,
+    history: [
+      { id: 'h21', action: '建立工單', actor: '張志偉', detail: '內部系統回報批次匯入錯誤', timestamp: '2026-03-23T07:45:00' },
+      { id: 'h22', action: '狀態變更', actor: '張志偉', detail: '狀態更新為「處理中」', timestamp: '2026-03-23T08:00:00' },
+      { id: 'h23', action: '轉接', actor: '張志偉', detail: '轉接至 技術支援 協助排查 nginx 設定', timestamp: '2026-03-23T08:10:00' },
+      { id: 'h24', action: '備註', actor: '張志偉', detail: '已定位根因：nginx client_max_body_size 限制', timestamp: '2026-03-23T08:25:00' },
+    ],
   },
   {
     id: 'T-20260323-006',
@@ -224,6 +294,10 @@ export const mockTickets: Ticket[] = [
       { id: 'm17', sender: 'customer', senderName: '劉家豪', content: '可以幫我查一下明細嗎？', timestamp: '2026-03-23T10:06:00' },
     ],
     internalNotes: '',
+    contactCount: 0,
+    history: [
+      { id: 'h25', action: '建立工單', actor: '系統', detail: '客戶透過 LINE 提交帳單疑問', timestamp: '2026-03-23T10:05:00' },
+    ],
   },
   {
     id: 'T-20260323-007',
@@ -245,6 +319,15 @@ export const mockTickets: Ticket[] = [
       { id: 'm21', sender: 'agent', senderName: '李小華', content: '更新：已定位問題為資料庫連線池耗盡，正在重啟服務。', timestamp: '2026-03-23T07:25:00' },
     ],
     internalNotes: 'P0 事件。根因：資料庫連線池滿載。已重啟並擴容。需寫事後報告。',
+    contactCount: 4,
+    history: [
+      { id: 'h26', action: '建立工單', actor: '李小華', detail: '多位客戶同時來電反映系統無法存取', timestamp: '2026-03-23T07:00:00' },
+      { id: 'h27', action: '優先級變更', actor: '李小華', detail: '優先級設定為「緊急」— P0 系統全面當機', timestamp: '2026-03-23T07:02:00' },
+      { id: 'h28', action: '轉接', actor: '李小華', detail: '轉接至 技術支援 + 主管 緊急處理', timestamp: '2026-03-23T07:05:00' },
+      { id: 'h29', action: '聯繫客戶', actor: '李小華', detail: '電話告知客戶正在搶修，預計 30 分鐘恢復', timestamp: '2026-03-23T07:10:00' },
+      { id: 'h30', action: '備註', actor: '李小華', detail: '已定位問題：資料庫連線池耗盡，正在重啟', timestamp: '2026-03-23T07:25:00' },
+      { id: 'h31', action: '狀態變更', actor: '李小華', detail: '狀態更新為「處理中」', timestamp: '2026-03-23T07:30:00' },
+    ],
   },
   {
     id: 'T-20260323-008',
@@ -264,6 +347,13 @@ export const mockTickets: Ticket[] = [
       { id: 'm23', sender: 'agent', senderName: '王雅琪', content: '感謝您的寶貴建議！我們已經將深色模式列入下季度的開發計畫中。屆時會優先通知您。', timestamp: '2026-03-22T10:00:00' },
     ],
     internalNotes: '已加入 Q3 roadmap，JIRA ticket: FEAT-2891',
+    contactCount: 1,
+    history: [
+      { id: 'h32', action: '建立工單', actor: '系統', detail: '客戶透過表單提交功能建議', timestamp: '2026-03-21T16:00:00' },
+      { id: 'h33', action: '指派', actor: '系統', detail: '指派給 王雅琪', timestamp: '2026-03-21T16:05:00' },
+      { id: 'h34', action: '聯繫客戶', actor: '王雅琪', detail: 'Email 回覆客戶，已納入開發計畫', timestamp: '2026-03-22T10:00:00' },
+      { id: 'h35', action: '結案', actor: '王雅琪', detail: '功能建議已記錄，結案', timestamp: '2026-03-22T10:05:00' },
+    ],
   },
   {
     id: 'T-20260323-009',
@@ -284,6 +374,14 @@ export const mockTickets: Ticket[] = [
       { id: 'm26', sender: 'customer', senderName: '蔡宗翰', content: '是的，請盡快核發。另外可以提供異常呼叫的詳細紀錄嗎？我需要做安全評估。', timestamp: '2026-03-23T06:45:00' },
     ],
     internalNotes: '安全事件。已停用舊金鑰 AK-****-7829。等待資安團隊提供異常呼叫紀錄後回覆客戶。',
+    contactCount: 3,
+    history: [
+      { id: 'h36', action: '建立工單', actor: '系統', detail: '客戶透過 Email 緊急回報 API 金鑰異常', timestamp: '2026-03-23T06:30:00' },
+      { id: 'h37', action: '指派', actor: '系統', detail: '指派給 張志偉（資安優先）', timestamp: '2026-03-23T06:32:00' },
+      { id: 'h38', action: '聯繫客戶', actor: '張志偉', detail: 'Email 回覆客戶，已停用金鑰', timestamp: '2026-03-23T06:40:00' },
+      { id: 'h39', action: '轉接', actor: '張志偉', detail: '轉接至 資安團隊 調查異常呼叫紀錄', timestamp: '2026-03-23T06:42:00' },
+      { id: 'h40', action: '狀態變更', actor: '張志偉', detail: '狀態更新為「待回覆」，等待資安團隊報告', timestamp: '2026-03-23T07:00:00' },
+    ],
   },
   {
     id: 'T-20260323-010',
@@ -303,6 +401,10 @@ export const mockTickets: Ticket[] = [
       { id: 'm28', sender: 'customer', senderName: '吳佳蓉', content: '我已經拍照存證了，需要的話可以提供照片。', timestamp: '2026-03-23T10:31:00' },
     ],
     internalNotes: '',
+    contactCount: 0,
+    history: [
+      { id: 'h41', action: '建立工單', actor: '系統', detail: '客戶來電反映商品瑕疵，要求退貨退款', timestamp: '2026-03-23T10:30:00' },
+    ],
   },
 ];
 

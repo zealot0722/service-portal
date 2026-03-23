@@ -62,6 +62,10 @@ export default function NewTicketPage() {
         },
       ],
       internalNotes: '',
+      contactCount: 0,
+      history: [
+        { id: `h-${Date.now()}`, action: '建立工單', actor: '客服人員', detail: `客戶透過 ${channel} 提交工單`, timestamp: now },
+      ],
     };
 
     addTicket(newTicket);
