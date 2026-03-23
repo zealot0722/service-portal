@@ -85,10 +85,13 @@ export default function NewTicketPage() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-slate-800 mb-6">新建工單</h2>
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-slate-900">新建工單</h2>
+        <p className="text-sm text-slate-500 mt-1">建立新的客服工單並分派處理</p>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 space-y-5">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-7 space-y-6">
           {/* 來源管道 */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -206,7 +209,7 @@ export default function NewTicketPage() {
           </button>
           <button
             type="submit"
-            className="px-5 py-2.5 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            className="px-6 py-2.5 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
           >
             建立工單
           </button>

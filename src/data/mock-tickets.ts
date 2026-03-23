@@ -66,26 +66,42 @@ export const channelIcon: Record<Channel, string> = {
 
 /** 狀態顏色 */
 export const statusColor: Record<Status, string> = {
-  '新建': 'bg-blue-100 text-blue-800',
-  '處理中': 'bg-yellow-100 text-yellow-800',
-  '待回覆': 'bg-orange-100 text-orange-800',
-  '已完成': 'bg-green-100 text-green-800',
+  '新建': 'bg-sky-100 text-sky-700',
+  '處理中': 'bg-amber-100 text-amber-700',
+  '待回覆': 'bg-violet-100 text-violet-700',
+  '已完成': 'bg-emerald-100 text-emerald-700',
 };
 
-/** 優先級顏色 */
+/** 優先級顏色（badge） */
 export const priorityColor: Record<Priority, string> = {
-  '低': 'bg-gray-100 text-gray-700',
-  '中': 'bg-blue-100 text-blue-700',
-  '高': 'bg-orange-100 text-orange-700',
-  '緊急': 'bg-red-100 text-red-700',
+  '低': 'bg-slate-100 text-slate-600',
+  '中': 'bg-blue-500 text-white',
+  '高': 'bg-amber-500 text-white',
+  '緊急': 'bg-red-500 text-white',
+};
+
+/** 優先級左邊線顏色 */
+export const priorityBorderColor: Record<Priority, string> = {
+  '低': 'border-l-slate-300',
+  '中': 'border-l-blue-400',
+  '高': 'border-l-amber-400',
+  '緊急': 'border-l-red-500',
 };
 
 /** 客戶等級顏色 */
 export const customerLevelColor: Record<CustomerLevel, string> = {
-  '一般': 'text-gray-500',
-  '白銀': 'text-slate-400',
-  '黃金': 'text-yellow-500',
+  '一般': 'text-slate-400',
+  '白銀': 'text-slate-500 font-medium',
+  '黃金': 'text-amber-600 font-semibold',
   'VIP': 'text-purple-600 font-bold',
+};
+
+/** 客戶等級 badge */
+export const customerLevelBadge: Record<CustomerLevel, string> = {
+  '一般': '',
+  '白銀': 'bg-slate-100 text-slate-600 border border-slate-300',
+  '黃金': 'bg-amber-50 text-amber-700 border border-amber-300',
+  'VIP': 'bg-purple-50 text-purple-700 border border-purple-300',
 };
 
 // ===== Mock 工單資料 =====
